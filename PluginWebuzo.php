@@ -73,12 +73,17 @@ class PluginWebuzo extends ServerPlugin
                 'type'          => 'hidden',
                 'description'   => lang('Hosting account parameters'),
                 'value'         => array(
+                    'resource-limits' => array (
+                        "type" => "text",
+                        "description" => lang("Resource Limits Plan (cGroups)"),
+                        "value" => ""
+                    ),
                     'owner' => array(
                         'type'           => 'check',
                         'label'          => 'Make the reseller account own itself',
                         'description'    => lang('Make the reseller account own itself.'),
                         'value'          => '1',
-                    ),
+                    )
                 )
             )
         );
@@ -291,6 +296,15 @@ class PluginWebuzo extends ServerPlugin
             // setup the reseller permissions if necessary
             if (isset($args['package']['is_reseller']) && $args['package']['is_reseller'] == 1) {
                 $this->addReseller($args);
+            }
+			
+            if(!empty($args['package']['variables']['resource-limits'])){
+                $resource_params = array();
+                $resource_params['plan'] = $args['package']['variables']['resource-limits'];
+                $resource_params['users'] = array($args['package']['username']);
+                $resource_params['allusers'] = false;
+                $resource_params['assign_plan'] = 1;
+                $resource_request = $this->api->call('resource_limits', $resource_params);
             }
         } else {
             $errors[] = "Error connecting to Webuzo server";
